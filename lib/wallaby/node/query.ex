@@ -217,6 +217,7 @@ defmodule Wallaby.Node.Query do
     retry fn ->
       parent
       |> Driver.find_elements(query)
+      |> assert_text(locator, Keyword.get(opts, :text, nil))
       |> assert_visibility(locator, Keyword.get(opts, :visible, true))
       |> assert_element_count(locator, Keyword.get(opts, :count, 1))
     end
@@ -273,6 +274,11 @@ defmodule Wallaby.Node.Query do
 
   defp matching_text?(node, locator) do
     Node.text(node) == locator
+  end
+
+  defp assert_text(elements, _, nil), do: elements
+  defp assert_text(elements, _, text) when is_binary(text) do
+    Enum.filter(elements, fn(elem) -> matching_text?(elem, text) end)
   end
 
   defp assert_visibility(elements, query, visible) when is_list(elements) do
